@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# MacOS
+.DS_Store
+
+# IDE / Editor
+.vscode/
+.idea/
+
+# OrionWiki runtime storage (stateful modda oluşan cache'ler)
+backend/storage/
+
+# Logs
+*.log
+
+# Jupyter / notebooks (şimdilik kullanılmıyor ama ileride için)
+.ipynb_checkpoints/
+
+
