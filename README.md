@@ -1,53 +1,53 @@
 ### OrionWiki
 
-OrionWiki, bir Git reposunu analiz edip **yüksek seviye mimariyi, ana akışları ve önemli bileşenleri** anlatan zengin bir wiki HTML çıktısı üreten, LLM tabanlı hafif bir araçtır.
+OrionWiki is a lightweight, LLM‑powered tool that analyzes a Git repository and generates a rich **architecture wiki** as a single HTML page.
 
-- **Input**: GitHub / GitLab (on‑prem dahil) repo URL’i + LLM API key’i  
-- **Süreç**: Repo klonlama → dosya tarama → chunk’lama → embedding → RAG tabanlı wiki section’ları → tek sayfalık HTML wiki  
-- **Output**: Dark tema, sol menülü, Mermaid diyagram destekli tek bir HTML dosyası
+- **Input**: GitHub / GitLab (including on‑prem) repository URL + LLM API key  
+- **Pipeline**: Clone repo → scan files → chunk text → embed → RAG‑style wiki sections → single HTML wiki  
+- **Output**: Dark themed, left‑nav layout with Mermaid diagrams and downloadable HTML
 
-Bu repo, `AsyncFuncAI/deepwiki-open` projesinden ilham almış, ancak **stateless / in‑memory MVP** olarak sadeleştirilmiş bir sürümdür.
+This project is inspired by [`AsyncFuncAI/deepwiki-open`](https://github.com/AsyncFuncAI/deepwiki-open) but implemented as a **stateless / in‑memory MVP**.
 
 ---
 
-### Özellikler
+### Features
 
 - **Stateless / in‑memory MVP**
-  - Her `Generate Wiki` çağrısı:
-    - Repo’yu geçici bir dizine klonlar
-    - Embedding + FAISS index’i sadece RAM’de kurar
-    - Tüm wiki HTML çıktısını response’ta döner
-  - Diskte kalıcı embedding / wiki saklanmaz (runtime cache sadece eski stateful mod için).
+  - Each `Generate Wiki` request:
+    - Clones the repository into a temporary directory
+    - Builds embeddings + a FAISS index in memory only
+    - Generates all wiki sections and returns the full HTML in the response
+  - No persistent embeddings or wiki files are stored on disk (existing `backend/storage/` is only for the older stateful mode).
 
-- **Mermaid diyagram desteği**
-  - `graph TD`, `flowchart`, `sequenceDiagram` blokları otomatik olarak Mermaid’e çevrilir.
+- **Mermaid diagram support**
+  - `graph TD`, `flowchart` and `sequenceDiagram` blocks are automatically detected and rendered with Mermaid.
 
-- **Private GitLab / GitHub desteği**
-  - UI’da `Git Access Token` alanı ile personal access token geçerek private repoları klonlayabilirsin.
-  - GitLab için otomatik `https://oauth2:<token>@gitlab.xxx.com/...` formatı kullanılır.
+- **Private GitLab / GitHub support**
+  - The UI exposes a `Git Access Token` field; you can provide a personal access token to clone private repositories.
+  - For GitLab, URLs are automatically converted to `https://oauth2:<token>@gitlab.xxx.com/...` format.
 
 - **Modern dark UI**
-  - Sol sidebar: proje logosu (OrionWiki), repo adı, export butonları, sayfa listesi.
-  - Sağ ana panel: seçili section içeriği, code block’lar ve diyagramlar.
+  - Left sidebar: OrionWiki logo, repo‑specific title, export buttons, and page list.
+  - Main area: selected section content, code blocks, and diagrams.
 
 ---
 
-### Gereksinimler
+### Requirements
 
 - Python 3.12
-- `requirements.txt`’teki bağımlılıklar:
+- Dependencies from `requirements.txt`:
   - `fastapi`, `uvicorn[standard]`, `pydantic`, `requests`
   - `faiss-cpu`, `streamlit`, `openai`, `markdown`
-- Git binary (`git clone` için)
+- `git` binary (for `git clone`)
 
-LLM sağlayıcısı olarak şu an **OpenAI compatible** endpoint’ler desteklenir (OpenAI, proxied endpoint’ler, OpenRouter vb. base_url ile).
+Currently, only **OpenAI‑compatible** LLM endpoints are used (OpenAI itself, or any proxy/OpenRouter‑style endpoint via `base_url`).
 
 ---
 
-### Kurulum (Local)
+### Local Setup
 
 ```bash
-git clone https://github.com/<kendi-kullanicin>/orionwiki.git
+git clone https://github.com/<your-github-username>/orionwiki.git
 cd orionwiki
 
 python -m venv venv
@@ -56,113 +56,110 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-#### Backend’i çalıştır
+#### Run the backend
 
 ```bash
 uvicorn backend.main:app --host 0.0.0.0 --port 8001
 ```
 
-#### UI (Streamlit) çalıştır
+#### Run the UI (Streamlit)
 
 ```bash
 streamlit run ui/app.py --server.port 3000 --server.address 0.0.0.0
 ```
 
-Tarayıcıda `http://localhost:3000` adresine git.
+Open `http://localhost:3000` in your browser.
 
 ---
 
-### Kullanım
+### Usage
 
-1. **LLM ayarları**
-   - Sidebar’dan:
+1. **Configure LLM settings**
+   - In the sidebar:
      - `Provider`: `openai`
-     - `Chat Model`: varsayılan `gpt-4-turbo` (değiştirilebilir)
-     - `Embedding Model`: varsayılan `text-embedding-3-small`
-     - `API Key`: OpenAI veya OpenAI‑compatible API anahtarın
+     - `Chat Model`: defaults to `gpt-4-turbo` (you can change it)
+     - `Embedding Model`: defaults to `text-embedding-3-small`
+     - `API Key`: your OpenAI or OpenAI‑compatible API key
 
-2. **Repo URL’i**
-   - `GitHub URL` alanına:
-     - Ör: `https://github.com/AsyncFuncAI/deepwiki-open`
-     - veya on‑prem GitLab:
+2. **Repository URL**
+   - In the `GitHub URL` field, provide:
+     - Example GitHub repo: `https://github.com/AsyncFuncAI/deepwiki-open`
+     - Or on‑prem GitLab:
        - `https://gitlab.xxx.com/group/private-repo`
 
-3. **Private repo’lar için token (opsiyonel)**
-   - `Git Access Token` alanına:
-     - GitHub PAT
-     - veya GitLab personal access token (en az `read_repository` / `api` scope)
+3. **Token for private repos (optional)**
+   - In the `Git Access Token` field:
+     - GitHub PAT, or
+     - GitLab personal access token (at least `read_repository` / `api` scope)
 
-4. **Wiki üretimi**
-   - `Generate Wiki` butonuna tıkla.
+4. **Generate the wiki**
+   - Click **Generate Wiki**.
    - Backend:
-     - Repo’yu geçici klasöre klonlar
-     - In‑memory FAISS index kurar
-     - Wiki outline + sayfaları üretir
-     - Tam HTML’i geri döner.
+     - Clones the repo into a temp directory
+     - Builds an in‑memory FAISS index
+     - Generates wiki outline + pages
+     - Returns the full HTML document
    - UI:
-     - HTML’i embed eder ve sol menülü wiki arayüzünü gösterir.
-     - `Download wiki HTML` butonu ile aynı dosyayı indirebilirsin.
+     - Embeds the HTML and shows the left‑nav wiki interface
+     - Provides a **Download wiki HTML** button to save the same file.
 
-Not: Stateless MVP modunda `Ask this repo` ve Deep Research endpoint’leri UI’dan kaldırılmıştır.
+> Note: In this stateless MVP, `Ask this repo` and Deep Research endpoints are disabled in the UI. They can be re‑introduced in a future stateful version.
 
 ---
 
-### Docker ile Çalıştırma
+### Running with Docker
 
-Repo kökünde bir `Dockerfile` bulunuyor.
+A `Dockerfile` is provided at the project root.
 
 ```bash
-# İmajı build et
+# Build the image
 docker build -t orionwiki:latest .
 
 # Backend
 docker run --rm -p 8001:8001 orionwiki:latest
 
-# UI (ayrı container, aynı imaj)
+# UI (separate container, same image)
 docker run --rm -p 3000:3000 \
   --env API_BASE="http://host.docker.internal:8001" \
   orionwiki:latest \
   streamlit run ui/app.py --server.port=3000 --server.address=0.0.0.0
 ```
 
-Linux’ta `host.docker.internal` yerine host IP’sini kullanman gerekebilir.
+On Linux you may need to replace `host.docker.internal` with your host IP.
 
 ---
 
 ### Kubernetes Deployment
 
-Stateless MVP sürümünü K8s üzerinde koşturmak için ayrıntılı bir rehber `K8S_DEPLOYMENT.md` dosyasında bulunuyor:
+For deploying the stateless MVP to Kubernetes, see the detailed guide in `K8S_DEPLOYMENT.md`:
 
-- Docker imajı build & push
-- Backend Deployment + Service
-- UI Deployment + Service (aynı imaj, farklı komut)
-- Ingress örneği (`orionwiki.example.com`)
-- Private GitLab/GitHub erişimi için notlar
+- Build & push the Docker image  
+- Backend `Deployment` + `Service`  
+- UI `Deployment` + `Service` (same image, different command)  
+- Ingress example (`orionwiki.example.com`)  
+- Notes for accessing private GitLab/GitHub from worker pods
 
-Bkz: `K8S_DEPLOYMENT.md`
-
----
-
-### Mimarî Notlar ve Gelecek Geliştirmeler
-
-`DEPLOYMENT_NOTES.md` dosyasında:
-
-- Multi‑tenant storage tasarımı (kullanıcı başına namespace)
-- Stateful moda geçiş (kalıcı FAISS index + wiki cache)
-- Auth / profil / kullanıcı yönetimi (JWT, OAuth, vb.)
-
-için yüksek seviyeli tasarım notları bulunuyor.
-
-Planlanan iyileştirmeler:
-
-- Stateless modun yanında isteğe bağlı **stateful mod** (cache + RAG + Ask this repo).
-- Login / profil ve kullanıcı bazlı repo/fiyatlandırma modeli.
-- Birden fazla LLM provider desteği (OpenRouter, Gemini, vs.).
+See: `K8S_DEPLOYMENT.md`
 
 ---
 
-### Lisans
+### Architecture Notes & Future Work
 
-Bu proje kişisel bir yan proje / eğitim projesi olarak tasarlanmıştır; lisans koşullarını kendi GitHub hesabında belirleyebilirsin (MIT, Apache‑2.0 vb.). README içeriği lisans beyanı içermez. 
+High‑level design notes are collected in `DEPLOYMENT_NOTES.md`, covering:
 
+- Multi‑tenant storage design (per‑user namespaces)
+- Transition to a stateful mode (persistent FAISS index + wiki cache)
+- Auth / profile / user management (JWT, OAuth, etc.)
 
+Planned improvements:
+
+- Optional **stateful mode** alongside the stateless mode (cache + RAG + Ask this repo)
+- Login / profile and per‑user repo/plan management
+- Support for multiple LLM providers (OpenRouter, Gemini, etc.)
+
+---
+
+### License
+
+This project is currently a personal / experimental project.  
+You can choose a license (e.g. MIT, Apache‑2.0) when publishing it on your own GitHub account; this README does not include a license statement by itself.
