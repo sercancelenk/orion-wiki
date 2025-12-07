@@ -10,6 +10,20 @@ This project is inspired by [`AsyncFuncAI/deepwiki-open`](https://github.com/Asy
 
 ---
 
+### Screenshots
+
+> Note: file names below assume you save your screenshots under a local `screenshots/` folder in the repo root.
+
+**OrionWiki UI (Streamlit front page)**
+
+![OrionWiki UI – repo & LLM settings sidebar](screenshots/orionwiki-ui.png)
+
+**Generated architecture wiki (HTML output)**
+
+![OrionWiki generated wiki – High Level Architecture page](screenshots/orionwiki-wiki.png)
+
+---
+
 ### Features
 
 - **Stateless / in‑memory MVP**
