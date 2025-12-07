@@ -6,9 +6,19 @@ import requests
 
 API_BASE = "http://localhost:8001"
 
-st.set_page_config(page_title="OrionWiki", layout="wide")
-st.title("OrionWiki")
+st.set_page_config(page_title="Orion Wiki", layout="wide")
 
+# Sidebar genişliğini biraz artırmak için basit bir CSS override
+st.markdown(
+    """
+    <style>
+    section[data-testid="stSidebar"] {
+        width: 320px !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 def get_llm_payload():
     """
@@ -24,6 +34,30 @@ def get_llm_payload():
 
 # === Sidebar ===
 with st.sidebar:
+    st.markdown(
+        """
+        <div style="display:flex;align-items:center;margin-bottom:1.5rem;">
+          <div style="
+              width:32px;
+              height:32px;
+              border-radius:16px;
+              background:radial-gradient(circle at 30% 20%, #e5e7eb 0, #c4b5fd 22%, #8b5cf6 55%, #4c1d95 100%);
+              display:flex;
+              align-items:center;
+              justify-content:center;
+              box-shadow:0 8px 20px rgba(15,23,42,0.8);
+          ">
+            <span style="font-size:20px;font-weight:700;color:#f9fafb;">O</span>
+          </div>
+          <div style="margin-left:10px;display:flex;flex-direction:column;">
+            <span style="font-size:18px;font-weight:600;color:#f9fafb;">Orion Wiki</span>
+            <span style="font-size:12px;color:#9ca3af;">powered by ai</span>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
     st.header("Repository")
     repo_url = st.text_input(
         "GitHub URL",
@@ -67,6 +101,25 @@ with st.sidebar:
     )
 
     generate_btn = st.button("Generate Wiki", type="primary")
+
+    # Footer
+    st.markdown(
+        """
+        <div style="
+            margin-top:2.5rem;
+            padding-top:0.75rem;
+            border-top:1px solid rgba(148,163,184,0.35);
+            font-size:12px;
+            color:#9ca3af;
+        ">
+          <span>Designed by </span>
+          <a href="https://github.com/sercancelenk" target="_blank" style="color:#a855f7;text-decoration:none;">
+            <strong>Sercan ÇELENK</strong>
+          </a>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 # === Generate Wiki çağrısı ===

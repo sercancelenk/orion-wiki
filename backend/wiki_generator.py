@@ -300,7 +300,8 @@ def generate_wiki_page_ephemeral(
     q_emb = embed_client.embed_texts([query])[0]
 
     q = np.array([q_emb], dtype="float32")
-    distances, indices = index.search(q, top_k=12)
+    # FAISS Python API: search(x, k) -> (distances, indices)
+    distances, indices = index.search(q, 12)
 
     neighbors: List[Dict[str, Any]] = []
     for dist, idx in zip(distances[0], indices[0]):
@@ -968,7 +969,7 @@ body {
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>{repo_id} - OrionWiki</title>
+  <title>{repo_id} - Orion Wiki</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
 {css}
